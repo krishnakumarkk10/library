@@ -5,6 +5,8 @@ from rest_framework.request import Request
 from accounts.models import LibraryRecords
 from django.utils import timezone
 from datetime import datetime
+from drf_spectacular.utils import extend_schema, OpenApiParameter, OpenApiExample
+from drf_spectacular.types import OpenApiTypes
 # Create your views here.
 
 
@@ -25,6 +27,44 @@ class CreateRecoreView(APIView):
 
     """
 
+    @extend_schema(
+        request={
+            "application/json": {
+                "type": "object",
+                "properties": {
+                    "name": {"type": "string"},
+                    "email": {"type": "string", "format": "email"},
+                    "phone_number": {"type": "string"},
+                    "book_name": {"type": "string"},
+                    "book_author": {"type": "string"},
+                    "end_date": {"type": "string", "format": "date"},
+                },
+                "required": [
+                    "name",
+                    "email",
+                    "phone_number",
+                    "book_name",
+                    "book_author",
+                    "end_date",
+                ],
+            }
+        },
+        responses={200: OpenApiTypes.OBJECT},
+        examples=[
+            OpenApiExample(
+                "Example Request",
+                value={
+                    "name": "Alice",
+                    "email": "alice@example.com",
+                    "phone_number": "1234567890",
+                    "book_name": "The Hobbit",
+                    "book_author": "J.R.R. Tolkien",
+                    "end_date": "2025-06-01",
+                },
+                request_only=True,
+            )
+        ],
+    )
     def post(self, request: Request) -> Response:
         name = request.data.get("name")
         email = request.data.get("email")
@@ -32,6 +72,7 @@ class CreateRecoreView(APIView):
         book_name = request.data.get("book_name")
         book_author = request.data.get("book_author")
         end_date = request.data.get("end_date")
+        print(name, email, phone_number, book_name, book_author, end_date)
         if (
             not name
             or not email
@@ -150,7 +191,21 @@ class DeleteRecordView(APIView):
         request (Request): The HTTP request object.
     """
 
-    def delete(self, request: Request) -> Response:
+    @extend_schema(
+        request={
+            "application/json": {
+                "type": "object",
+                "properties": {
+                    "id": {"type": "integer"},
+                },
+                "required": [
+                    "id",
+                ],
+            }
+        },
+        responses={200: OpenApiTypes.OBJECT},
+    )
+    def post(self, request: Request) -> Response:
         record_id = request.data.get("id")
         if not record_id:
             return Response(
@@ -191,6 +246,31 @@ class UpdateRecordView(APIView):
         request (Request): The HTTP request object.
     """
 
+    @extend_schema(
+        request={
+            "application/json": {
+                "type": "object",
+                "properties": {
+                    "id": {"type": "integer"},
+                    "name": {"type": "string"},
+                    "email": {"type": "string", "format": "email"},
+                    "phone_number": {"type": "string"},
+                    "book_name": {"type": "string"},
+                    "book_author": {"type": "string"},
+                    "end_date": {"type": "string", "format": "date"},
+                },
+                "required": [
+                    "id",
+                    "name",
+                    "email",
+                    "phone_number",
+                    "book_name",
+                    "book_author",
+                    "end_date",
+                ],
+            }
+        }
+    )
     def put(self, request: Request) -> Response:
         record_id = request.data.get("id")
         name = request.data.get("name")
